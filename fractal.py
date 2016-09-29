@@ -54,13 +54,6 @@ def num_iterations_until_escape(constant):
 def get_colors(iterations):
     num = iterations
     return PALETTE[num]
-#    if iterations == DEPTH:
-#        return (255, 255, 255)
-#    else:
-#        return (0,0,0)
-    percent = iterations / DEPTH
-    color = 255 - int(255 * percent)
-    return (color, color, 0)
 
 def make_image(pixels_colors):
     im = Image.new("RGB", (WIDTH, HEIGHT))
