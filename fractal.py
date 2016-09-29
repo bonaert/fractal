@@ -3,10 +3,13 @@ import os
 from PIL import Image
 
 CONSTANT = 5+2*1j
-DEPTH = 1000
+DEPTH = 500
 
 WIDTH = 800
 HEIGHT = 600
+
+ITERATIONS_FILE_NAME = "iterations.data"
+PIXEL_COLORS_FILE_NAME = "pixel.data"
 
 def evolution(val, constant=CONSTANT):
     return val**2 + constant
@@ -56,8 +59,15 @@ def scale_y(y):
     # The Mandelbrot Y scale is (-1, 1)
     return -1.0 +  2 * (y / HEIGHT)
 
-def make_mandelbrot_image():
-    colors_pixels = []
+def restore_from_file(filename):
+    try:
+        with open(filename, 'r') as f:
+            return json.load(f)
+    except:
+        return None
+
+def compute_iterations():
+    iterations = []
     for x in range(WIDTH):
         print(x)
         scaled_x = scale_x(x)
@@ -65,11 +75,27 @@ def make_mandelbrot_image():
             scaled_y = scale_y(y)
             constant = scaled_x + scaled_y*1j
             num_iterations = num_iterations_until_escape(constant)
-            color = get_colors(num_iterations)
-            colors_pixels.append(color)
+            iterations.append(num_iterations)
+    return iterations
+
+def get_iterations():
+    data = restore_from_file(ITERATIONS_FILE_NAME)
+    if data is None:
+        data = compute_iterations()
+
+    return data
+
+def make_mandelbrot_image():
+    iterations = get_iterations()
+    colors_pixels = list(map(get_colors, iterations))
     print(colors_pixels)
-    with open("pixel.data", "w") as f:
-        f.write(colors_pixels)
+
+    with open(ITERATIONS_FILE_NAME, "w") as f:
+        f.write(str(iterations))
+
+    with open(PIXEL_COLORS_FILE_NAME, "w") as f:
+        f.write(str(colors_pixels))
+    
     make_image(colors_pixels)
 
 make_mandelbrot_image()
