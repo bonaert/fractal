@@ -10,7 +10,7 @@ Y_SCALE = (- 2.2, 2.2)
 X_SIZE = X_SCALE[1] - X_SCALE[0]
 Y_SIZE = Y_SCALE[1] - Y_SCALE[0]
 
-DIM = 200
+DIM = 100
 WIDTH = int(DIM * X_SIZE)
 HEIGHT = int(DIM * Y_SIZE)
 
@@ -60,7 +60,6 @@ def make_image(pixels_colors):
     im = Image.new("RGB", (WIDTH, HEIGHT))
     im.putdata(pixels_colors)
     im.save(IMAGE_FILE_NAME,"PNG")
-    os.system("xdg-open " + IMAGE_FILE_NAME)
     return im
 
 def scale_x(x):
@@ -91,15 +90,18 @@ def compute_iterations():
             iterations.append(num_iterations)
     return iterations
 
-def get_iterations():
-    data = restore_from_file(ITERATIONS_FILE_NAME)
+def get_iterations(should_restore_from_file=True):
+    data = None
+    if should_restore_from_file:
+        data = restore_from_file(ITERATIONS_FILE_NAME)
+
     if data is None:
         data = compute_iterations()
 
     return data
 
-def make_mandelbrot_image():
-    iterations = get_iterations()
+def make_mandelbrot_image(restore_from_file=True):
+    iterations = get_iterations(restore_from_file)
     print("Got iterations")
     colors_pixels = list(map(get_colors, iterations))
     print("Got pixel colors")
@@ -112,7 +114,8 @@ def make_mandelbrot_image():
     
     print("Saved data")
     
-    make_image(colors_pixels)
+    return make_image(colors_pixels)
 
-make_mandelbrot_image()
-
+if __name__ == '__main__':
+    make_mandelbrot_image()
+    os.system("xdg-open " + IMAGE_FILE_NAME)
