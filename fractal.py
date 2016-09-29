@@ -17,6 +17,7 @@ HEIGHT = int(DIM * Y_SIZE)
 
 ITERATIONS_FILE_NAME = "iterations.data"
 PIXEL_COLORS_FILE_NAME = "pixel.data"
+IMAGE_FILE_NAME = "fractal.png"
 
 import colorsys
 colors_max = DEPTH + 1
@@ -58,8 +59,8 @@ def get_colors(iterations):
 def make_image(pixels_colors):
     im = Image.new("RGB", (WIDTH, HEIGHT))
     im.putdata(pixels_colors)
-    im.save("fractal.png","PNG")
-    os.system("xdg-open fractal.png")
+    im.save(IMAGE_FILE_NAME,"PNG")
+    os.system("xdg-open " + IMAGE_FILE_NAME)
     return im
 
 def scale_x(x):
