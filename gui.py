@@ -1,7 +1,8 @@
+import tkinter
 
 from tkinter import *
 from PIL import ImageTk
-from fractal import make_mandelbrot_image
+from fractal import ImageGenerator
 
 def make_tkinter_image(pil_image):
     return ImageTk.PhotoImage(pil_image)
@@ -9,15 +10,52 @@ def make_tkinter_image(pil_image):
 class App:
 
     def __init__(self, master):
-        pil_image = make_mandelbrot_image(restore_from_file=True)
-        image = make_tkinter_image(pil_image)
-#        canvas.create_image(image.width(), image.height(),image=image)
-        label = Label(master, image=image)
-        label.image = image
-        label.pack()
+        self.generator = ImageGenerator()
+        self.image = self.make_image(restore=False)
 
-    def say_hi(self):
-        print("hi there, everyone!")
+        self.label = Label(master, image=self.image)
+        self.label.image = self.image
+        self.label.pack()
+        
+        
+        self.button = tkinter.Button(master, text="Zoom", command=self.zoom)
+        self.button.pack()
+
+        self.button2 = tkinter.Button(master, text="Zoom Out", command=self.zoomout)
+        self.button2.pack()
+
+
+        self.button3 = tkinter.Button(master, text="Move right", command=self.moveright)
+        self.button3.pack()
+
+        self.button4 = tkinter.Button(master, text="Move left", command=self.moveleft)
+        self.button4.pack()
+
+    def make_image(self, restore=False):
+        pil_image = self.generator.make_mandelbrot_image(restore_from_file=restore)
+        image = make_tkinter_image(pil_image)
+        return image
+
+    def zoom(self, factor=0.5):
+        print("Zoom")
+        self.generator.zoom(factor)
+        self.put_image()
+
+    def put_image(self):
+        self.image = self.make_image()
+        self.label.configure(image=self.image)
+    
+    def zoomout(self):
+        self.zoom(2)
+
+    def moveleft(self):
+        self.generator.move_left()
+        self.put_image()
+
+    def moveright(self):
+        self.generator.move_right()
+        self.put_image()
+        
 
 root = Tk()
 app = App(root)
