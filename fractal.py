@@ -9,7 +9,7 @@ PIXEL_COLORS_FILE_NAME = "pixel.data"
 IMAGE_FILE_NAME = "fractal.png"
 
 
-DEPTH = 70
+DEPTH = 80
 
 
 
@@ -36,9 +36,9 @@ class ImageGenerator:
         self.X_SIZE = self.X_SCALE[1] - self.X_SCALE[0]
         self.Y_SIZE = self.Y_SCALE[1] - self.Y_SCALE[0]
 
-        self.DIM = 100
-        self.WIDTH = int(self.DIM * self.X_SIZE)
-        self.HEIGHT = int(self.DIM * self.Y_SIZE)
+        self.DIM = 80
+        self.WIDTH = 500#int(self.DIM * self.X_SIZE)
+        self.HEIGHT = 500#int(self.DIM * self.Y_SIZE)
 
 
         self.PALETTE = generate_palette()
@@ -47,21 +47,17 @@ class ImageGenerator:
         return val**2 + constant
 
     def is_inside_bounds(self, val):
-        # Fast simple evaluation
-        # return abs(val.real) < 2 and abs(val.imag) < 2
-
-        # Slower, more precise version
-        return abs(val) <= 2
+        return (val.real * val.real + val.imag * val.imag) <= 4
 
     def num_iterations_until_escape(self, constant):
-        num = 0+0*1j
-        iterations = 0
-        while self.is_inside_bounds(num) and iterations < DEPTH:
-            num = self.evolution(num, constant)
-            iterations += 1
+    	iterations = 0
+    	val = 0j
+    	while val.real * val.real + val.imag * val.imag <= 4 and iterations < DEPTH:
+    		val = val**2 + constant
+    		iterations += 1
 
-        return iterations
-
+    	return iterations
+    	
     def get_colors(self, iterations):
         num = iterations
         return self.PALETTE[num]
@@ -89,10 +85,9 @@ class ImageGenerator:
         except:
             return None
 
-    def compute_iterations(self):
+    def compute_iterations2(self):
         iterations = []
         for y in range(self.HEIGHT):
-            print(y)
             scaled_y = self.scale_y(y)
             for x in range(self.WIDTH):
                 scaled_x = self.scale_x(x)
@@ -101,7 +96,22 @@ class ImageGenerator:
                 iterations.append(num_iterations)
         return iterations
 
+    def compute_iterations(self):
+    	os.system("./generate %f %f %f %f" % (self.X_SCALE[0], self.Y_SCALE[0], self.X_SCALE[1], self.Y_SCALE[1]))
+    	iterations = []
+    	with open("iterations.txt") as f:
+    		for line in f:
+    			line = line.strip().split()
+    			line = list(map(int, line))
+    			iterations.extend(line)
+    	
+    	return iterations
+
+
     def get_iterations(self, should_restore_from_file=True):
+        return self.compute_iterations()
+
+
         data = None
         if should_restore_from_file:
             data = self.restore_from_file(ITERATIONS_FILE_NAME)
@@ -117,13 +127,13 @@ class ImageGenerator:
         colors_pixels = list(map(self.get_colors, iterations))
         print("Got pixel colors")
 
-        with open(ITERATIONS_FILE_NAME, "w") as f:
-            f.write(str(iterations))
+#        with open(ITERATIONS_FILE_NAME, "w") as f:
+#            f.write(str(iterations))
 
-        with open(PIXEL_COLORS_FILE_NAME, "w") as f:
-            f.write(str(colors_pixels))
+#        with open(PIXEL_COLORS_FILE_NAME, "w") as f:
+#            f.write(str(colors_pixels))
         
-        print("Saved data")
+        #print("Saved data")
         
         return self.make_image(colors_pixels)
 
