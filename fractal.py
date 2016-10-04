@@ -3,29 +3,26 @@ import json
 
 from PIL import Image
 
-
 ITERATIONS_FILE_NAME = "iterations.data"
 PIXEL_COLORS_FILE_NAME = "pixel.data"
 IMAGE_FILE_NAME = "fractal.png"
 
-
 DEPTH = 80
-
-
 
 # Pas moi
 import colorsys
+
 colors_max = DEPTH + 1
+
+
 # Calculate a tolerable palette
 def generate_palette():
     palette = [0] * colors_max
     for i in range(colors_max):
-        f = 1-abs((float(i)/colors_max-1)**15)
-        r, g, b = colorsys.hsv_to_rgb(.66+f/3, 1-f/2, f)
-        palette[i] = (int(r*255), int(g*255), int(b*255))
+        f = 1 - abs((float(i) / colors_max - 1) ** 15)
+        r, g, b = colorsys.hsv_to_rgb(.66 + f / 3, 1 - f / 2, f)
+        palette[i] = (int(r * 255), int(g * 255), int(b * 255))
     return palette
-
-
 
 
 class ImageGenerator:
@@ -37,27 +34,26 @@ class ImageGenerator:
         self.Y_SIZE = self.Y_SCALE[1] - self.Y_SCALE[0]
 
         self.DIM = 80
-        self.WIDTH = 500#int(self.DIM * self.X_SIZE)
-        self.HEIGHT = 500#int(self.DIM * self.Y_SIZE)
-
+        self.WIDTH = 500  # int(self.DIM * self.X_SIZE)
+        self.HEIGHT = 500  # int(self.DIM * self.Y_SIZE)
 
         self.PALETTE = generate_palette()
 
     def evolution(self, val, constant):
-        return val**2 + constant
+        return val ** 2 + constant
 
     def is_inside_bounds(self, val):
         return (val.real * val.real + val.imag * val.imag) <= 4
 
     def num_iterations_until_escape(self, constant):
-    	iterations = 0
-    	val = 0j
-    	while val.real * val.real + val.imag * val.imag <= 4 and iterations < DEPTH:
-    		val = val**2 + constant
-    		iterations += 1
+        iterations = 0
+        val = 0j
+        while val.real * val.real + val.imag * val.imag <= 4 and iterations < DEPTH:
+            val = val ** 2 + constant
+            iterations += 1
 
-    	return iterations
-    	
+        return iterations
+
     def get_colors(self, iterations):
         num = iterations
         return self.PALETTE[num]
@@ -65,7 +61,7 @@ class ImageGenerator:
     def make_image(self, pixels_colors):
         im = Image.new("RGB", (self.WIDTH, self.HEIGHT))
         im.putdata(pixels_colors)
-        im.save(IMAGE_FILE_NAME,"PNG")
+        im.save(IMAGE_FILE_NAME, "PNG")
 
         return im
 
@@ -76,7 +72,6 @@ class ImageGenerator:
     def scale_y(self, y):
         # The Mandelbrot Y scale is (-1, 1)
         return self.Y_SCALE[0] + self.Y_SIZE * (y / self.HEIGHT)
-
 
     def restore_from_file(self, filename):
         try:
@@ -91,68 +86,57 @@ class ImageGenerator:
             scaled_y = self.scale_y(y)
             for x in range(self.WIDTH):
                 scaled_x = self.scale_x(x)
-                constant = scaled_x + scaled_y*1j
+                constant = scaled_x + scaled_y * 1j
                 num_iterations = self.num_iterations_until_escape(constant)
                 iterations.append(num_iterations)
         return iterations
 
     def compute_iterations(self):
-    	os.system("./generate %f %f %f %f" % (self.X_SCALE[0], self.Y_SCALE[0], self.X_SCALE[1], self.Y_SCALE[1]))
-    	iterations = []
-    	with open("iterations.txt") as f:
-    		for line in f:
-    			line = line.strip().split()
-    			line = list(map(int, line))
-    			iterations.extend(line)
-    	
-    	return iterations
+        os.system("./generate %f %f %f %f" % (self.X_SCALE[0], self.Y_SCALE[0], self.X_SCALE[1], self.Y_SCALE[1]))
+        iterations = []
+        with open("iterations.txt") as f:
+            for line in f:
+                line = line.strip().split()
+                line = list(map(int, line))
+                iterations.extend(line)
 
+        return iterations
 
     def get_iterations(self, should_restore_from_file=True):
         return self.compute_iterations()
 
-
-        data = None
-        if should_restore_from_file:
-            data = self.restore_from_file(ITERATIONS_FILE_NAME)
-
-        if data is None:
-            data = self.compute_iterations()
-
-        return data
-
     def make_mandelbrot_image(self, restore_from_file=True):
         iterations = self.get_iterations(restore_from_file)
-        print("Got iterations")
         colors_pixels = list(map(self.get_colors, iterations))
-        print("Got pixel colors")
-
-#        with open(ITERATIONS_FILE_NAME, "w") as f:
-#            f.write(str(iterations))
-
-#        with open(PIXEL_COLORS_FILE_NAME, "w") as f:
-#            f.write(str(colors_pixels))
-        
-        #print("Saved data")
-        
         return self.make_image(colors_pixels)
 
-    def zoom(self, factor = 0.5):
+    def zoom(self, factor=0.5):
         self.X_SCALE = (factor * self.X_SCALE[0], factor * self.X_SCALE[1])
         self.Y_SCALE = (factor * self.Y_SCALE[0], factor * self.Y_SCALE[1])
 
         self.X_SIZE *= factor
         self.Y_SIZE *= factor
 
-    def move_right(self, factor=0.3):
-        x_adjust = self.X_SIZE * factor
-
+    def move(self, factorX=1.0, factorY=1.0):
+        x_adjust = self.X_SIZE * factorX
         self.X_SCALE = tuple((x + x_adjust for x in self.X_SCALE))
 
-    def move_left(self, factor=0.3):
-        x_adjust = self.X_SIZE * factor
+        y_adjust = self.Y_SIZE * factorY
+        self.Y_SCALE = tuple((y - y_adjust for y in self.Y_SCALE))
 
-        self.X_SCALE = tuple((x - x_adjust for x in self.X_SCALE))
+    def move_right(self, factor=0.3):
+        self.move(factorX=factor, factorY=0)
+
+    def move_left(self, factor=0.3):
+        self.move(factorX=-factor, factorY=0)
+
+    def move_up(self, factor=0.3):
+        self.move(factorX=0, factorY=factor)
+
+    def move_down(self, factor=0.3):
+        self.move(factorX=0, factorY=-factor)
+
+
 if __name__ == '__main__':
     image_generator = ImageGenerator()
     image = image_generator.make_mandelbrot_image()
