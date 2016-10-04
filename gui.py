@@ -25,11 +25,17 @@ class App:
         self.button2.pack()
 
 
-        self.button3 = tkinter.Button(master, text="Move right", command=self.moveright)
+        self.button3 = tkinter.Button(master, text="Right", command=self.moveright)
         self.button3.pack()
 
-        self.button4 = tkinter.Button(master, text="Move left", command=self.moveleft)
+        self.button4 = tkinter.Button(master, text="Left", command=self.moveleft)
         self.button4.pack()
+
+        self.button5 = tkinter.Button(master, text="Up", command=self.moveup)
+        self.button5.pack()
+
+        self.button6 = tkinter.Button(master, text="Down", command=self.movedown)
+        self.button6.pack()
 
     def make_image(self, restore=False):
         pil_image = self.generator.make_mandelbrot_image(restore_from_file=restore)
@@ -54,6 +60,14 @@ class App:
 
     def moveright(self):
         self.generator.move_right()
+        self.put_image()
+
+    def moveup(self):
+        self.generator.move_up()
+        self.put_image()
+
+    def movedown(self):
+        self.generator.move_down()
         self.put_image()
         
 
