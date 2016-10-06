@@ -3,6 +3,8 @@ import json
 
 from PIL import Image
 
+from time import time
+
 ITERATIONS_FILE_NAME = "iterations.data"
 PIXEL_COLORS_FILE_NAME = "pixel.data"
 IMAGE_FILE_NAME = "fractal.png"
@@ -61,7 +63,7 @@ class ImageGenerator:
     def make_image(self, pixels_colors):
         im = Image.new("RGB", (self.WIDTH, self.HEIGHT))
         im.putdata(pixels_colors)
-        im.save(IMAGE_FILE_NAME, "PNG")
+        #im.save(IMAGE_FILE_NAME, "PNG")
 
         return im
 
@@ -122,6 +124,8 @@ class ImageGenerator:
         self.X_SCALE = tuple((x + x_adjust for x in self.X_SCALE))
 
         y_adjust = self.Y_SIZE * factorY
+        # The Y-axis in the opposite direction than the usual
+        # Cartesian graph
         self.Y_SCALE = tuple((y - y_adjust for y in self.Y_SCALE))
 
     def move_right(self, factor=0.3):
