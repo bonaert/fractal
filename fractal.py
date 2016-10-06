@@ -109,7 +109,7 @@ class ImageGenerator:
 
     def make_mandelbrot_image(self, restore_from_file=True):
         iterations = self.get_iterations(restore_from_file)
-        colors_pixels = list(map(self.get_colors, iterations))
+        colors_pixels = [self.PALETTE[num] for num in iterations]
         return self.make_image(colors_pixels)
 
     def zoom(self, factor=0.5):
