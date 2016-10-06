@@ -56,10 +56,6 @@ class ImageGenerator:
 
         return iterations
 
-    def get_colors(self, iterations):
-        num = iterations
-        return self.PALETTE[num]
-
     def make_image(self, pixels_colors):
         im = Image.new("RGB", (self.WIDTH, self.HEIGHT))
         im.putdata(pixels_colors)
@@ -108,10 +104,24 @@ class ImageGenerator:
         return self.compute_iterations()
 
     def make_mandelbrot_image(self, restore_from_file=True):
+        start = time()
         iterations = self.get_iterations(restore_from_file)
-        colors_pixels = [self.PALETTE[num] for num in iterations]
-        return self.make_image(colors_pixels)
+        end = time()
+        print("It took %f seconds to generate the numbers" % (end - start))
 
+
+
+        start = time()
+        colors_pixels = [self.PALETTE[num] for num in iterations]
+        end = time()
+        print("It took %f seconds to get the colors" % (end - start))
+    
+        start = time()
+        image = self.make_image(colors_pixels)
+        end = time()
+        print("It took %f seconds to generate the image" % (end - start))
+
+        return image
     def zoom(self, factor=0.5):
         self.X_SCALE = (factor * self.X_SCALE[0], factor * self.X_SCALE[1])
         self.Y_SCALE = (factor * self.Y_SCALE[0], factor * self.Y_SCALE[1])
