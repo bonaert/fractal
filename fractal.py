@@ -122,12 +122,18 @@ class ImageGenerator:
         print("It took %f seconds to generate the image" % (end - start))
 
         return image
+
     def zoom(self, factor=0.5):
-        self.X_SCALE = (factor * self.X_SCALE[0], factor * self.X_SCALE[1])
-        self.Y_SCALE = (factor * self.Y_SCALE[0], factor * self.Y_SCALE[1])
+
+        x_center = self.X_SCALE[0] + self.X_SIZE / 2
+        y_center = self.Y_SCALE[0] + self.Y_SIZE / 2
 
         self.X_SIZE *= factor
         self.Y_SIZE *= factor
+        
+        self.X_SCALE = (x_center - self.X_SIZE / 2, x_center + self.X_SIZE / 2)
+        self.Y_SCALE = (y_center - self.Y_SIZE / 2, y_center + self.Y_SIZE / 2)
+
 
     def move(self, factorX=1.0, factorY=1.0):
         x_adjust = self.X_SIZE * factorX
